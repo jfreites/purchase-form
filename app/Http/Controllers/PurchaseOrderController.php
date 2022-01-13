@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Http\Services\PurchaseOrderService;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -21,35 +22,26 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Validate the payload and persist the order
+     * Validate the payload and persist the order.  An ajax request is expected (TODO VALIDATE THAT)
      *
      * @param Request $request
      * @return void
      */
-    public function store(Request $request)
+    public function store(StorePurchaseOrderRequest $request)
     {
-        /*
-        $data = [
-            "_token" => "dTTUUWqxc28l9x7IURmbEZ4JMU0bP7wcLaRh5aYg"
-            "cart_product" => array:2 [▼
-                0 => "SKU02"
-                1 => "SKU03"
-            ]
-            "sku_SKU02" => "1"
-            "sku_SKU03" => "3"
-        ];
-        */
-
-        $validData = $request->validate([
-            'product_sku' => 'required',
-            'quantity'    => 'required|integer|min:1',
-        ]);
-
         // Save order items
-        if (! PurchaseOrderService::saveOrderItems($validData)) {
-            return back()->with('error', __('Something went wrong. Please contact to support!'));
+        if (! PurchaseOrderService::saveOrderItems($request->all())) {
+            session()->flash('warning', __('Something went wrong. Please contact to support!'));
+
+            return response()->json([
+                'message' => __('Something went wrong. Please contact to support!')
+            ], 400);
         }
 
-        return redirect()->to('/')->with('success', __('Successfully placed order!'));
+        session()->flash('success', __('The order was placed correctly!'));
+
+        return response()->json([
+            'message' => __('The order was placed correctly!')
+        ]);
     }
 }

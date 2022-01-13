@@ -35,11 +35,19 @@
   <main>
     <div class="py-5 text-center">
       <img class="d-block mx-auto mb-4" src="/images/logo.svg" alt="Bamba logo" width="132" height="24">
-      <h2>Formulario de compra</h2>
-      <p class="lead">Selecciona un producto de la lista y la cantidad que deseas (maximo 10) para que se agregue al carrito, una vez tengas todos los productos que deseas presiona "Confirmar compra" para completar el proceso.</p>
+      <h2>Creación de orden de compra</h2>
+      <p class="lead">Selecciona un producto de la lista y la cantidad que deseas (máximo 10) para que se agregue al carrito, una vez tengas todos los productos que deseas presiona "Confirmar compra" para completar el proceso.</p>
     </div>
 
     <div class="row g-5">
+
+      @if(session()->has('success'))
+      <div id="userMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+          <span>{{ session('success') }}</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      @endif
+
       <div class="col-md-5 col-lg-4 order-md-last">
         <h4 class="d-flex justify-content-between align-items-center mb-3">
           <span class="text-primary">Tu carrito</span>
@@ -50,8 +58,7 @@
         </ul>
 
         <form id="cartForm" action="{{ route('purchase-order.store') }}" method="POST" class="card p-2">
-            @csrf
-          <button class="w-100 btn btn-primary btn-lg" type="submit">Confirmar compra</button>
+          <button class="w-100 btn btn-primary btn-lg" type="submit" onclick="submitOrder(event)">Confirmar orden</button>
         </form>
       </div>
       <div class="col-md-7 col-lg-8">
@@ -63,7 +70,7 @@
                 <select class="form-select" name="product_sku" id="product_sku" required>
                     <option value="">Elegir...</option>
                     @foreach ($products as $product)
-                        <option value="{{ $product->price }}">{{ $product->sku }}</option>
+                        <option data-price="{{ $product->price }}" value="{{ $product->sku }}">{{ $product->sku }}</option>
                     @endforeach
                 </select>
                 <div class="invalid-feedback">
@@ -80,7 +87,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <span onclick="addOrderItem()" class="btn btn-secondary">Agregar</span>
+                    <span onclick="addOrderItem()" class="btn btn-secondary" style="margin: 15px auto;">Agregar</span>
                 </div>
             </div>
         </form>
@@ -89,7 +96,7 @@
   </main>
 
   <footer class="my-5 pt-5 text-muted text-center text-small">
-    <p class="mb-1">&copy; 2022 Bamba - Purchase form demo</p>
+    <p class="mb-1">&copy; 2022 Creación de orden de compra</p>
   </footer>
 </div>
 
@@ -117,23 +124,26 @@
             }
         }
 
+        // Global array list with the cart items..
+        var cartListItems = [];
+
+        // Add an element to the cart list
         function addOrderItem() {
             let li = document.createElement("li");
             li.classList.add("list-group-item","d-flex","justify-content-between","lh-sm");
 
             let productSelect = document.getElementById("product_sku");
-
-            let inputSKU = productSelect.options[productSelect.selectedIndex].text;
-            let inputPrice = productSelect.value;
+            let inputSKU = productSelect.options[productSelect.selectedIndex].value;
             let inputQTY = document.getElementById("quantity").value;
+            let productPrice = productSelect.options[productSelect.selectedIndex].dataset.price;
 
             // TODO: if the same product is added twice, the quantity should be increased
 
-            let t = document.createTextNode("SKU: " + inputSKU + " [x " + inputQTY + "] $ " + inputPrice);
+            let textNode = document.createTextNode(inputSKU + " [x " + inputQTY + "] - $" + productPrice);
 
-            li.appendChild(t);
+            li.appendChild(textNode);
             
-            if (inputSKU === '') {
+            if ('' === inputSKU) {
                 alert("You must select a product!");
             } else {
                 document.getElementById("orderItems").appendChild(li);
@@ -148,22 +158,11 @@
             span.appendChild(txt);
             li.appendChild(span);
 
-            let cartForm = document.getElementById("cartForm");
-            let productID = document.createElement("input");
-            productID.setAttribute("type", "hidden");
-            productID.setAttribute("name", "cart_product[]");
-            productID.setAttribute("value", inputSKU);
-
-            let productQty = document.createElement("input");
-            productQty.setAttribute("type", "hidden");
-            productQty.setAttribute("name", "sku_" + inputSKU);
-            productQty.setAttribute("value", inputQTY);
-            
-            cartForm.appendChild(productID);
-            cartForm.appendChild(productQty);
-
             //let productCounter = document.getElementById("productCounter");
             //productCounter.appendChild(document.getElementById("orderItems").childNodes.length);
+
+            let cartListItem = { 'sku': inputSKU, 'qty': inputQTY };
+            cartListItems.push(cartListItem);
 
             for (i = 0; i < close.length; i++) {
                 close[i].onclick = function() {
@@ -171,6 +170,47 @@
                     div.style.display = "none";
                 }
             }
+        }
+
+        // Clear the things up
+        function clearCart() {
+          cartListItems = [];
+          let ul = document.getElementById("orderItems");
+          let child = ul.lastElementChild;
+          while (child) {
+            ul.removeChild(child);
+            child = ul.lastElementChild;
+          }
+        }
+
+        // Handler for the form submission
+        function submitOrder(event) {
+          event.preventDefault();
+
+          postPurchaseOrder(JSON.stringify(cartListItems));
+        } 
+        
+        // Ajax request to the backend
+        function postPurchaseOrder(postData) {
+          const xmlhttp = new XMLHttpRequest();
+
+          let csrfToken = "{{ csrf_token() }}";
+
+          xmlhttp.open("POST", "/purchase-order/create");
+          xmlhttp.setRequestHeader("x-csrf-token", csrfToken);    
+          xmlhttp.setRequestHeader("Accept", "application/json");
+          xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+          xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                console.log("We got a response : " + xmlhttp.response);
+                window.location.reload();
+            } else if (xmlhttp.status == 0) {
+                console.log("Something went wrong");
+            }
+          };
+
+          xmlhttp.send(postData);
         }
     </script>
   </body>
