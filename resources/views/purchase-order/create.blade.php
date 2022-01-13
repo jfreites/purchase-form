@@ -41,12 +41,7 @@
 
     <div class="row g-5">
 
-      @if(session()->has('success'))
-      <div id="userMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-          <span>{{ session('success') }}</span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      @endif
+      @include('partials.alerts')
 
       <div class="col-md-5 col-lg-4 order-md-last">
         <h4 class="d-flex justify-content-between align-items-center mb-3">
@@ -202,11 +197,10 @@
           xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
           xmlhttp.onreadystatechange = function() {
+            console.log(xmlhttp.readyState, xmlhttp.status)
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 console.log("We got a response : " + xmlhttp.response);
                 window.location.reload();
-            } else if (xmlhttp.status == 0) {
-                console.log("Something went wrong");
             }
           };
 

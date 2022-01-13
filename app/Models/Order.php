@@ -8,4 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['total'];
+
+    /**
+     * Get the comments for the blog post.
+     */
+    public function items()
+    {
+        return $this->hasMany(Item::class);
+    }
 }

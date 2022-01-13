@@ -35,7 +35,7 @@ class PurchaseOrderController extends Controller
 
             return response()->json([
                 'message' => __('Something went wrong. Please contact to support!')
-            ], 400);
+            ]);
         }
 
         session()->flash('success', __('The order was placed correctly!'));

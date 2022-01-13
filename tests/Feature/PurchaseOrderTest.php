@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class PurchaseOrderTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic feature test example.
      *
@@ -18,7 +21,7 @@ class PurchaseOrderTest extends TestCase
         $response = $this->get('/purchase-order/create');
 
         $response->assertStatus(200);
-        $response->assertSee('Formulario de compra');
+        $response->assertSee('Creación de orden de compra');
     }
 
     /**
@@ -28,13 +31,36 @@ class PurchaseOrderTest extends TestCase
      */
     public function test_order_total_after_request()
     {
-        /*
-        Preparar el payload que se enviaría por medio del formulario, este payload debe incluir un producto de cada SKU (SKU01, SKU02, SKU03)
-        Realizar un post a la ruta que se defina para el store (guardado de orden)
-        Realizar los siguientes asserts
-            Probar que en db el total de la orden es igual a 385.50
-            Probar que uno de los items tenga el product_id que corresponda al SKU02
-        */
-        $this->markTestSkipped('to be implemented');
+        $p1 = Product::factory()->create([
+            'sku' => 'SKU01',
+            'price' => '125.50'
+        ]);
+
+        $p2 = Product::factory()->create([
+            'sku' => 'SKU02',
+            'price' => '210'
+        ]);
+
+        $p3 = Product::factory()->create([
+            'sku' => 'SKU03',
+            'price' => '50'
+        ]);
+
+        $payload = [
+            ['sku' => $p1->sku, 'qty' => 1],
+            ['sku' => $p2->sku, 'qty' => 1],
+            ['sku' => $p3->sku, 'qty' => 1]
+        ];
+
+        $response = $this->postJson('/purchase-order/create', $payload);
+
+        $response->assertStatus(200)->assertJson([
+            'message' => 'The order was placed correctly!'
+        ]);
+
+        $this->assertDatabaseCount('order_items', 3);
+        $this->assertDatabaseHas('orders', [
+            'total' => 385.50,
+        ]);
     }
 }

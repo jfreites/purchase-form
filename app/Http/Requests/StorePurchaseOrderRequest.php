@@ -24,7 +24,7 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules()
     {
         return [
-            '*.sku' => 'required', // validate is a valid sku
+            '*.sku' => 'required|exists:products,sku',
             '*.qty' => 'required|integer|min:1',
         ];
     }
