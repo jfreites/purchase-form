@@ -9,6 +9,21 @@ use Illuminate\Http\Request;
 class PurchaseOrderController extends Controller
 {
     /**
+     * PurchaseOrderServive
+     */
+    protected $purchaseOrderService;
+
+    /**
+     * Construct function
+     *
+     * @param PurchaseOrderService $purchaseOrderService
+     */
+    public function __construct(PurchaseOrderService $purchaseOrderService)
+    {
+        $this->purchaseOrderService = $purchaseOrderService;
+    }
+
+    /**
      * show the purchase form to user.
      *
      * @return void
@@ -16,7 +31,7 @@ class PurchaseOrderController extends Controller
     public function create()
     {
         return view('purchase-order.create', [
-            'products' => PurchaseOrderService::getProducts(),
+            'products' => $this->purchaseOrderService->getProducts(),
         ]);
     }
 
@@ -29,7 +44,7 @@ class PurchaseOrderController extends Controller
     public function store(StorePurchaseOrderRequest $request)
     {
         // Save order items
-        if (! PurchaseOrderService::savePurchaseOrder($request->all())) {
+        if (! $this->purchaseOrderService->savePurchaseOrder($request->all())) {
             session()->flash('warning', __('Something went wrong. Please contact to support!'));
 
             return response()->json([

@@ -18,7 +18,7 @@ class PurchaseOrderService
      * @param array|null $with
      * @return Collection
      */
-    public static function getProducts($with = null): Collection
+    public function getProducts($with = null): Collection
     {
         return is_null($with) ? Product::all() : Product::with($with)->get();
     }
@@ -28,7 +28,7 @@ class PurchaseOrderService
      *
      * @return bool
      */
-    public static function savePurchaseOrder(array $items): bool
+    public function savePurchaseOrder(array $items): bool
     {
         // Because we are gonna to perform a lot of inserts better prepare a db transaction
         DB::beginTransaction();
@@ -40,7 +40,7 @@ class PurchaseOrderService
     
             $order->save();
 
-            list($orderItems, $orderTotal) = static::prepareOrderItems($order->id, $items);
+            list($orderItems, $orderTotal) = $this->prepareOrderItems($order->id, $items);
 
             // Update the total for the order
             $order->total = $orderTotal;
@@ -66,7 +66,7 @@ class PurchaseOrderService
      * @param int $orderId
      * @param array $orderItems
      */
-    private static function prepareOrderItems(int $orderId, array $items): array 
+    private function prepareOrderItems(int $orderId, array $items): array 
     {
         $orderTotal = 0;
         $orderItems = [];
