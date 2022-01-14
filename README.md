@@ -29,8 +29,15 @@ Para ejecutar las pruebas
 
 ## Screenshot
 
-![formulario](form_screen.png "Formulario")
+![formulario_ready](form_screen.png "Formulario")
+
+![formulario_success](form_success.png "Formulario Exito")
 
 ## Consideraciones
 
 Ciertas decisiones de implementación y practicas fueron pensadas para el contexto del caso de uso solicitado. En proyectos más complejos otras direcciones pudieron haberse tomado. 
+
+## Librerias adicionales usadas en el proyecto
+
+[https://getbootstrap.com/](https://getbootstrap.com/)
+[https://github.com/orchidjs/tom-select](https://github.com/orchidjs/tom-select)

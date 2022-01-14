@@ -27,6 +27,8 @@
         }
       }
     </style>
+
+    <link href="{{ asset('/css/tom-select.bootstrap5.css') }}" rel="stylesheet">
     
   </head>
   <body class="bg-light">
@@ -62,7 +64,7 @@
             <div class="row g-3">
                 <div class="col-md-5">
                 <label for="product_sku" class="form-label">SKU</label>
-                <select class="form-select" name="product_sku" id="product_sku" required>
+                <select class="form-select" name="product_sku" id="product_sku" placeholder="Elegir..." autocomplete="off" required>
                     <option value="">Elegir...</option>
                     @foreach ($products as $product)
                         <option data-price="{{ $product->price }}" value="{{ $product->sku }}">{{ $product->sku }}</option>
@@ -97,10 +99,19 @@
 
             
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="{{ asset('/js/tom-select.complete.js') }}"></script>
     <script>
         // Global array list with the cart items..
         var cartListItems = [];
         var cartTotal = 0;
+
+        new TomSelect("#product_sku",{
+          create: false,
+          sortField: {
+            field: "text",
+            direction: "asc"
+          }
+        });
 
         // Add an element to the cart list
         function addOrderItem() {
