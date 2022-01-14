@@ -17,7 +17,7 @@ class Order extends Model
     protected $fillable = ['total'];
 
     /**
-     * Get the comments for the blog post.
+     * Get the items for the Order.
      */
     public function items()
     {

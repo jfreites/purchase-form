@@ -6,17 +6,29 @@ use App\Models\Item;
 use App\Models\Order;
 use App\Models\Product;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderService
 {
     /**
+     * Get all products with or without associations
+     *
+     * @param array|null $with
+     * @return Collection
+     */
+    public static function getProducts($with = null): Collection
+    {
+        return is_null($with) ? Product::all() : Product::with($with)->get();
+    }
+
+    /**
      * Save order items from the request.
      *
      * @return bool
      */
-    public static function saveOrderItems(array $items): bool
+    public static function savePurchaseOrder(array $items): bool
     {
         // Because we are gonna to perform a lot of inserts better prepare a db transaction
         DB::beginTransaction();

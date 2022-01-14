@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Http\Services\PurchaseOrderService;
-use App\Models\Product;
 use Illuminate\Http\Request;
 
 class PurchaseOrderController extends Controller
@@ -17,7 +16,7 @@ class PurchaseOrderController extends Controller
     public function create()
     {
         return view('purchase-order.create', [
-            'products' => Product::all(),
+            'products' => PurchaseOrderService::getProducts(),
         ]);
     }
 
@@ -30,7 +29,7 @@ class PurchaseOrderController extends Controller
     public function store(StorePurchaseOrderRequest $request)
     {
         // Save order items
-        if (! PurchaseOrderService::saveOrderItems($request->all())) {
+        if (! PurchaseOrderService::savePurchaseOrder($request->all())) {
             session()->flash('warning', __('Something went wrong. Please contact to support!'));
 
             return response()->json([
