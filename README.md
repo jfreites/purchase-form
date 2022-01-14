@@ -5,13 +5,27 @@ El proyecto pensado para ser ejecutado mediante Laravel Sail por mas convenienci
 
 Clonar el proyecto
 
-```git clone git@github.com:jfreites/purchase-form.git```
+```git clone git@github.com:jfreites/purchase-form.git demo_project```
+
+Instalar paquetes usando un container efimero con Docker
+
+```cd demo_project && docker run --rm -v $(pwd):/app composer install```
+
+O si tienes composer local solo se ejecuta
+
+```cd demo_project && composer install```
+
+Copia el archivo de configuration. Se pueden cambiar los puertos en el que app y la db estará expuesta
+
+```cp .env.sample .env```
 
 Ejecutar Sail para preparar el entorno local
 
 ```./vendor/bin/sail up```
 
-Revisar que todo este OK visitando [http://localhost:8888](http://localhost:8888/)
+Revisar que todo este OK visitando:
+
+[http://localhost:8888](http://localhost:8888/)
 
 Una vez esten los container creados vamos a migrar la DB
 
@@ -21,13 +35,15 @@ Creemos algunos productos para poder crear ordenes de compra
 
 ```./vendor/bin/sail artisan db:seed```
 
-El formulario esta disponible en [http://localhost:8888/purchase-order/create](http://localhost:8888/purchase-order/create)
+El formulario esta disponible en:
+
+[http://localhost:8888/purchase-order/create](http://localhost:8888/purchase-order/create)
 
 Para ejecutar las pruebas
 
 ```./vendor/bin/sail artisan test```
 
-## Screenshot
+## Screenshots
 
 ![formulario_ready](form_screen.png "Formulario")
 
