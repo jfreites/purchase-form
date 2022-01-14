@@ -16,7 +16,7 @@ class Item extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_id', 'product_id', 'total'];
+    protected $fillable = ['order_id', 'product_id', 'quantity', 'total'];
 
     /**
      * Get the Product related with this order item.
@@ -25,7 +25,6 @@ class Item extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
 
     /**
      * Get the Order related with this order item.

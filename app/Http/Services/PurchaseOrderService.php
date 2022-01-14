@@ -12,41 +12,23 @@ use Illuminate\Support\Facades\Log;
 class PurchaseOrderService
 {
     /**
-     * Save order items from the request
+     * Save order items from the request.
      *
      * @return bool
      */
     public static function saveOrderItems(array $items): bool
     {
-        $orderTotal = 0;
-        $orderItems = [];
-
         // Because we are gonna to perform a lot of inserts better prepare a db transaction
         DB::beginTransaction();
 
         try {
+            // Create an order with 0 as total just for have the ID
             $order = new Order;
-            $order->total = $orderTotal;
+            $order->total = 0;
     
             $order->save();
 
-            $order->fresh();
-
-            foreach($items as $item) {
-                $product = Product::where('sku', $item['sku'])->first();
-                $total = $product->price * $item['qty'];
-    
-                $orderItem = [
-                    'order_id'   => $order->id,
-                    'product_id' => $product->id,
-                    'total'      => $total,
-                    'created_at' => Carbon::now()
-                ];
-    
-                $orderTotal += $product->price;
-    
-                array_push($orderItems, $orderItem);
-            }
+            list($orderItems, $orderTotal) = static::prepareOrderItems($order->id, $items);
 
             // Update the total for the order
             $order->total = $orderTotal;
@@ -57,12 +39,43 @@ class PurchaseOrderService
 
             // It's safetly to commit the operations
             DB::commit();
+
+            return true;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             DB::rollBack();
             return false;
         }
+    }
 
-        return true;
+    /**
+     * Helper function to create an prepared array with order items and sum their totals
+     *
+     * @param int $orderId
+     * @param array $orderItems
+     */
+    private static function prepareOrderItems(int $orderId, array $items): array 
+    {
+        $orderTotal = 0;
+        $orderItems = [];
+
+        foreach($items as $item) {
+            $product = Product::where('sku', $item['sku'])->first();
+            
+            $total      = $product->price * $item['qty'];
+            $orderTotal += $total;
+
+            $orderItem = [
+                'order_id'   => $orderId,
+                'product_id' => $product->id,
+                'quantity'   => $item['qty'],
+                'total'      => $total,
+                'created_at' => Carbon::now()
+            ];
+
+            array_push($orderItems, $orderItem);
+        }
+
+        return [$orderItems, $orderTotal];
     }
 }

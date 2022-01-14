@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class PurchaseOrderController extends Controller
 {
     /**
-     * show the purchase form to user
+     * show the purchase form to user.
      *
      * @return void
      */
@@ -22,7 +22,7 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Validate the payload and persist the order.  An ajax request is expected (TODO VALIDATE THAT)
+     * Create a purchase order by an ajax request.
      *
      * @param Request $request
      * @return void

@@ -12,7 +12,7 @@ class PurchaseOrderTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * A basic feature test example.
+     * Test that the purchase order creation page is available.
      *
      * @return void
      */
@@ -25,7 +25,7 @@ class PurchaseOrderTest extends TestCase
     }
 
     /**
-     * Another basic feature test example.
+     * Test that a request is perfomed correctly and the items exists in the DB.
      *
      * @return void
      */
@@ -59,8 +59,13 @@ class PurchaseOrderTest extends TestCase
         ]);
 
         $this->assertDatabaseCount('order_items', 3);
+        
         $this->assertDatabaseHas('orders', [
             'total' => 385.50,
+        ]);
+        
+        $this->assertDatabaseHas('order_items', [
+            'product_id' => $p2->id,
         ]);
     }
 }

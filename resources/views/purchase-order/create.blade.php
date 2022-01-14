@@ -46,13 +46,13 @@
       <div class="col-md-5 col-lg-4 order-md-last">
         <h4 class="d-flex justify-content-between align-items-center mb-3">
           <span class="text-primary">Tu carrito</span>
-          <span id="productCounter" class="badge bg-primary rounded-pill">0</span>
         </h4>
 
         <ul id="orderItems" class="list-group mb-3">
         </ul>
 
         <form id="cartForm" action="{{ route('purchase-order.store') }}" method="POST" class="card p-2">
+          <p>$ <span id="cartTotal">0</span></p>
           <button class="w-100 btn btn-primary btn-lg" type="submit" onclick="submitOrder(event)">Confirmar orden</button>
         </form>
       </div>
@@ -75,7 +75,7 @@
 
                 <div class="col-md-4">
                 <label for="state" class="form-label">Cantidad</label>
-                <input type="number" class="form-control" name="quantity" id="quantity" min="1" max="10" required>
+                <input type="number" class="form-control" name="quantity" id="quantity" value="1" min="1" max="10" required>
                 <div class="invalid-feedback">
                     Please provide a quantity for this product.
                 </div>
@@ -98,29 +98,9 @@
             
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script>
-        // Create a "close" button and append it to each list item
-        var myNodelist = document.getElementsByTagName("LI");
-        var i;
-        for (i = 0; i < myNodelist.length; i++) {
-            let span = document.createElement("SPAN");
-            let txt = document.createTextNode("\u00D7");
-            span.className = "close";
-            span.appendChild(txt);
-            myNodelist[i].appendChild(span);
-        }
-
-        // Click on a close button to hide the current list item
-        var close = document.getElementsByClassName("close");
-        var i;
-        for (i = 0; i < close.length; i++) {
-            close[i].onclick = function() {
-                let div = this.parentElement;
-                div.style.display = "none";
-            }
-        }
-
         // Global array list with the cart items..
         var cartListItems = [];
+        var cartTotal = 0;
 
         // Add an element to the cart list
         function addOrderItem() {
@@ -132,7 +112,13 @@
             let inputQTY = document.getElementById("quantity").value;
             let productPrice = productSelect.options[productSelect.selectedIndex].dataset.price;
 
-            // TODO: if the same product is added twice, the quantity should be increased
+            const found = cartListItems.some(el => el.sku === inputSKU);
+            if (found) {
+              // TODO: if the same product is added twice, the quantity should be increased.For now show an alert
+              alert("Ya agregaste este producto :)");
+
+              return;
+            }
 
             let textNode = document.createTextNode(inputSKU + " [x " + inputQTY + "] - $" + productPrice);
 
@@ -146,25 +132,12 @@
 
             document.getElementById("product_sku").value = "";
 
-            let span = document.createElement("SPAN");
-            let txt = document.createTextNode("\u00D7");
-            
-            span.className = "close";
-            span.appendChild(txt);
-            li.appendChild(span);
-
-            //let productCounter = document.getElementById("productCounter");
-            //productCounter.appendChild(document.getElementById("orderItems").childNodes.length);
-
             let cartListItem = { 'sku': inputSKU, 'qty': inputQTY };
             cartListItems.push(cartListItem);
 
-            for (i = 0; i < close.length; i++) {
-                close[i].onclick = function() {
-                    let div = this.parentElement;
-                    div.style.display = "none";
-                }
-            }
+            // Update the label with the cart total
+            cartTotal += (productPrice * inputQTY);
+            document.getElementById("cartTotal").innerHTML = parseFloat(cartTotal);
         }
 
         // Clear the things up
@@ -181,6 +154,12 @@
         // Handler for the form submission
         function submitOrder(event) {
           event.preventDefault();
+
+          if (cartListItems.length === 0) {
+            alert("Hey, parece que no ha agregado nada aun!");
+
+            return;
+          }
 
           postPurchaseOrder(JSON.stringify(cartListItems));
         } 
